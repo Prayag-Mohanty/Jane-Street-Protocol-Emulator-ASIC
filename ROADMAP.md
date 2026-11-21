@@ -6,7 +6,7 @@ This file is the plan, not a design. It deliberately contains no architecture an
 
 | Item | What the page says | Still open |
 |---|---|---|
-| Deadline | Submit by **18 Jan 2027** | No time zone given. Ask asic-competition@janestreet.com, or just aim for 16 Jan |
+| Deadline | Submit by **18 Jan 2027, IST** | Internal target: submit by **16 Jan** as a buffer |
 | Process | IHP 130 nm **CMOS5L** via Tiny Tapeout. `ttihp-verilog-template` main branch (no `cmos5l` branch needed) | — |
 | Area | **8x4 tiles** (set in `info.yaml`), confirmed final. ~202 × 155 µm per tile, ~1.0 mm² total | "~1K logic cells per tile" is their *rough* estimate. Measure it yourself |
 | Pins | 24 digital pins: 8 in, 8 out, 8 bidir, plus clk and rst_n. No analog pads. 3.3 V I/O on the demo board | No pre-assigned host interface. **Program loading is part of your design** |
@@ -24,12 +24,18 @@ This file is the plan, not a design. It deliberately contains no architecture an
 | Judging | No fixed weighting. **Flexibility first**, then protocols demonstrated, unique capabilities, design + verification. **Write-up weighed heavily** (readability, clarity on new techniques). Fewer protocols + strong architecture/verification can win | — |
 | Verification | They're interested in formal, constrained random, AI-assisted verification. Tests that run on open-source tools (cocotb) help them reproduce your results | — |
 | AI | Allowed. Describe how you used it in the write-up | — |
-| Teams | Students and professionals, any team size, one entry per team | — |
+| Teams | Students and professionals, any team size, one entry per team | **Entering solo** |
 | Outcome | Winners announced early Feb. ~4 designs taped out on the March 2027 shuttle. Winners get the chip on a demo board | — |
 
-- [ ] Fill in the sign-up form (no confirmation email is sent)
-- [ ] Email to ask the deadline's time zone
-- [ ] Optional: join the Tiny Tapeout Discord competitions channel to find teammates
+- [x] Fill in the sign-up form (no confirmation email is sent)
+- [x] Deadline time zone confirmed: IST
+- [x] Team decision: solo
+
+### Solo-entry implications
+- **Scope.** The organisers recommend teams because of the workload. Solo, the MVP is UART + SPI + I2C done very well, plus one blind protocol. Stretch protocols only after the week-7 freeze criteria are met in budget.
+- **The blind test needs someone who's not you.** That doesn't make them a teammate. Ask a labmate or friend to spend one afternoon writing a protocol from your docs alone, and credit them in the write-up. Fallback: write it yourself from the docs alone, at least two weeks after you last touched the ISA, and log every time you had to read the RTL.
+- **No second pair of eyes on reviews.** Make up for it with automation: CI on every push, formal properties, and the lockstep tests. Do a written self-review against §4 at the end of weeks 3, 5 and 7.
+- **Time-box the learning.** Weeks 1–2 are learning plus budgets. Don't let prior-art reading spill into week 3.
 
 ## 1. Learning path (each stage ends with a check)
 
@@ -87,7 +93,7 @@ This file is the plan, not a design. It deliberately contains no architecture an
 4. **Software loop**: ISA doc → ISS → assembler → programs → revise. Freeze the ISA only when every target protocol *and* at least one blind-test protocol fits.
 5. **RTL against the golden model**: lockstep, cycle by cycle.
 6. **Harden weekly**: track area, slack and utilisation as a time series. They go in the write-up.
-7. **Blind flexibility test**: someone else, docs only, a protocol you never considered. Time how long it takes and log every question they had to ask.
+7. **Blind flexibility test**: someone else (a friend or labmate; see the solo notes in §0), docs only, a protocol you never considered. Time how long it takes and log every question they had to ask.
 8. **Scope control**: define an MVP and a freeze date. Write down what you will cut first if you're late. Only start stretch protocols once the budgets say they fit.
 
 ## 3. Verification checklist
@@ -132,4 +138,4 @@ This file is the plan, not a design. It deliberately contains no architecture an
 - **Wk 4–5**: RTL, unit tests, lockstep, CI, harden every week
 - **Wk 6**: formal, random, GLS, blind test, stretch goal only if budgets allow
 - **Wk 7**: close timing and area, freeze, precheck green
-- **Wk 8**: write-up, docs, examples, submit. Leave a buffer of a few days before 18 Jan.
+- **Wk 8 (11–18 Jan)**: write-up, docs, examples. **Submit by 16 Jan**, leaving 2 days of buffer before the 18 Jan IST deadline.
