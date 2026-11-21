@@ -2,30 +2,32 @@
 
 This file is the plan, not a design. It deliberately contains no architecture answers.
 
-## 0. Rules, checked against the competition page (post dated 10 Sep 2026, updated 9 Nov 2026)
+## 0. Rules, checked against the competition page (post dated 10 Sep 2026, updated 9 Nov 2026; re-checked 21 Nov 2026)
 
 | Item | What the page says | Still open |
 |---|---|---|
-| Deadline | Submit by **18 Jan 2027, IST** | Internal target: submit by **16 Jan** as a buffer |
+| Deadline | Submit by **18 Jan 2027**. The page itself gives no time zone or hour; we confirmed **IST** | Internal target: submit by **16 Jan** as a buffer. Submission form is still to be posted closer to the deadline |
 | Process | IHP 130 nm **CMOS5L** via Tiny Tapeout. `ttihp-verilog-template` main branch (no `cmos5l` branch needed) | — |
 | Area | **8x4 tiles** (set in `info.yaml`), confirmed final. ~202 × 155 µm per tile, ~1.0 mm² total | "~1K logic cells per tile" is their *rough* estimate. Measure it yourself |
-| Pins | 24 digital pins: 8 in, 8 out, 8 bidir, plus clk and rst_n. No analog pads. 3.3 V I/O on the demo board | No pre-assigned host interface. **Program loading is part of your design** |
+| Pins | 24 digital pins: 8 in, 8 out, 8 bidir, plus clk and rst_n. No analog pads. 3.3 V I/O on the demo board | No pre-assigned host interface |
+| Program loading | **Part of your design.** The demo board's RP2350 is the natural host, but any documented host works | How the program gets in, and how many pins that costs |
 | I/O speed | ~10 ns round trip, ~66 MHz max output | Tiny Tapeout *estimates*. No CMOS5L silicon has been measured yet. Leave margin |
 | Clock | No target. The RP2350 on the demo board supplies it. **60 MHz is confirmed OK** | Pick a frequency that closes timing after place-and-route |
-| SRAM | IHP SRAM macros allowed, more than one, as long as everything fits and passes precheck. See Ken Pettit's walkthrough | Macro area vs flops: measure it |
+| SRAM | IHP SRAM macros allowed, more than one, as long as everything fits and passes precheck. The page notes SRAM can be more area-efficient than flops for instruction memory. See Ken Pettit's walkthrough | Macro area vs flops: measure it |
 | Analog | Allowed inside the design (e.g. a PLL) if it passes precheck | — |
 | External parts | Allowed on a Pmod (pull-ups, transceivers, level shifters). **You must document them** | I2C pull-ups, USB/Ethernet transceivers |
-| Architecture | Doesn't have to be a CPU. An eFPGA, shared-pipeline engines or anything else is fine, as long as it can be reprogrammed after fab | — |
+| Architecture | Doesn't have to be a CPU (CPU-style is just the most common approach). An eFPGA, shared-pipeline engines or anything else is fine, as long as it can be reprogrammed after fab to support new protocols. The software side is required too: assembler/toolchain (or bitstream flow) plus example programs. Suggested inspiration: RP2040 PIO, TI PRU | — |
 | Protocols | UART, SPI, I2C. Stretch: LS USB, 10 Mbit Ethernet. Also suggested: JTAG, SWD, PS/2, CAN | No fixed speeds. Targets: common baud rates, SPI modes 0–3, I2C 100/400 kHz |
-| Pluses | Running protocols concurrently. Controller *and* target roles. For USB/Ethernet, doing line coding, CRC and clock recovery on-chip | — |
+| Pluses | Running protocols concurrently. Controller *and* target roles (both "a plus but not required"). For USB/Ethernet, the more line coding, CRC and clock recovery on-chip, the better. Unique functionality and novel design/verification methods are of interest | — |
 | Reset | Flops don't start at 0, so use `rst_n`. Deselect powers the design down, so reload the program after reselect | — |
-| Flow | Tiny Tapeout flow and precheck only. Use local hardening + custom GDS action if you hit the 6 h Actions limit. GLS strongly recommended | — |
-| Deliverables | Public repo: RTL, tests, passing GDS/precheck, architecture + instruction-set docs, assembler/toolchain + example programs, verification write-up. A video is optional | Repo can stay private until you submit |
-| Judging | No fixed weighting. **Flexibility first**, then protocols demonstrated, unique capabilities, design + verification. **Write-up weighed heavily** (readability, clarity on new techniques). Fewer protocols + strong architecture/verification can win | — |
+| Flow | Tiny Tapeout flow and precheck only; no extra sign-off. Use local hardening + custom GDS action if you hit the 6 h Actions limit. GLS strongly recommended. An FPGA is suggested for testing RTL first, if you have one | — |
+| Deliverables | A **link to a public repo** with: RTL, tests, passing GDS/precheck, architecture + instruction-set docs, assembler/toolchain + example programs, verification write-up. A video/demo is optional (reviewed if provided) | Repo can stay private until you submit |
+| Judging | No fixed weighting. **Flexibility first** (can it be reprogrammed for protocols it wasn't designed for?), then protocols demonstrated, unique capabilities, design + verification. **Write-up weighed heavily** (readability, clarity on new techniques). Fewer protocols + strong architecture/verification can win | Judges aren't named. Jane Street can't review designs before the deadline, but questions can go to asic-competition@janestreet.com |
 | Verification | They're interested in formal, constrained random, AI-assisted verification. Tests that run on open-source tools (cocotb) help them reproduce your results | — |
 | AI | Allowed. Describe how you used it in the write-up | — |
+| HDL | Any. Jane Street uses Hardcaml, but it's not required | — |
 | Teams | Students and professionals, any team size, one entry per team | **Entering solo** |
-| Outcome | Winners announced early Feb. ~4 designs taped out on the March 2027 shuttle. Winners get the chip on a demo board | — |
+| Outcome | Winners announced early Feb. ~4 designs taped out on the March 2027 CMOS5L shuttle (subject to the foundry schedule). Winners get the chip on a demo board and work with Jane Street on small non-functional fixes (e.g. re-hardening) | — |
 
 - [x] Fill in the sign-up form (no confirmation email is sent)
 - [x] Deadline time zone confirmed: IST
@@ -139,3 +141,12 @@ This file is the plan, not a design. It deliberately contains no architecture an
 - **Wk 6**: formal, random, GLS, blind test, stretch goal only if budgets allow
 - **Wk 7**: close timing and area, freeze, precheck green
 - **Wk 8 (11–18 Jan)**: write-up, docs, examples. **Submit by 16 Jan**, leaving 2 days of buffer before the 18 Jan IST deadline.
+
+## Sources and links
+- [Competition announcement](https://blog.janestreet.com/protocol-emulator-asic-competition/)
+- [Tiny Tapeout IHP Verilog template](https://github.com/TinyTapeout/ttihp-verilog-template)
+- [Tiny Tapeout docs](https://tinytapeout.com) · [Demo board specs](https://tinytapeout.com/specs/pcb-etr/) · [Pinouts](https://tinytapeout.com/specs/pinouts/)
+- [Local hardening guide](https://tinytapeout.com/guides/local-hardening/) · [FPGA vs ASIC guide](https://tinytapeout.com/hdl/fpga_vs_asic/)
+- [SRAM macro walkthrough (Ken Pettit)](https://kdp1965.github.io/ihp-um-janestreet-prism/ihp_sram_macro.html)
+- [Hardcaml](https://hardcaml.org) (optional)
+- Questions: asic-competition@janestreet.com
