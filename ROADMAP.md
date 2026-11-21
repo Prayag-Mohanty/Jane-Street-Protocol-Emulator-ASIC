@@ -2,19 +2,34 @@
 
 This file is the plan, not a design. It deliberately contains no architecture answers.
 
-## 0. Facts to re-check against the competition page (not yet verified)
+## 0. Rules, checked against the competition page (post dated 10 Sep 2026, updated 9 Nov 2026)
 
-I couldn't fetch the competition page from this environment, so every number below came from earlier notes. Confirm each one on the page or the Tiny Tapeout docs, then tick it.
+| Item | What the page says | Still open |
+|---|---|---|
+| Deadline | Submit by **18 Jan 2027** | No time zone given. Ask asic-competition@janestreet.com, or just aim for 16 Jan |
+| Process | IHP 130 nm **CMOS5L** via Tiny Tapeout. `ttihp-verilog-template` main branch (no `cmos5l` branch needed) | — |
+| Area | **8x4 tiles** (set in `info.yaml`), confirmed final. ~202 × 155 µm per tile, ~1.0 mm² total | "~1K logic cells per tile" is their *rough* estimate. Measure it yourself |
+| Pins | 24 digital pins: 8 in, 8 out, 8 bidir, plus clk and rst_n. No analog pads. 3.3 V I/O on the demo board | No pre-assigned host interface. **Program loading is part of your design** |
+| I/O speed | ~10 ns round trip, ~66 MHz max output | Tiny Tapeout *estimates*. No CMOS5L silicon has been measured yet. Leave margin |
+| Clock | No target. The RP2350 on the demo board supplies it. **60 MHz is confirmed OK** | Pick a frequency that closes timing after place-and-route |
+| SRAM | IHP SRAM macros allowed, more than one, as long as everything fits and passes precheck. See Ken Pettit's walkthrough | Macro area vs flops: measure it |
+| Analog | Allowed inside the design (e.g. a PLL) if it passes precheck | — |
+| External parts | Allowed on a Pmod (pull-ups, transceivers, level shifters). **You must document them** | I2C pull-ups, USB/Ethernet transceivers |
+| Architecture | Doesn't have to be a CPU. An eFPGA, shared-pipeline engines or anything else is fine, as long as it can be reprogrammed after fab | — |
+| Protocols | UART, SPI, I2C. Stretch: LS USB, 10 Mbit Ethernet. Also suggested: JTAG, SWD, PS/2, CAN | No fixed speeds. Targets: common baud rates, SPI modes 0–3, I2C 100/400 kHz |
+| Pluses | Running protocols concurrently. Controller *and* target roles. For USB/Ethernet, doing line coding, CRC and clock recovery on-chip | — |
+| Reset | Flops don't start at 0, so use `rst_n`. Deselect powers the design down, so reload the program after reselect | — |
+| Flow | Tiny Tapeout flow and precheck only. Use local hardening + custom GDS action if you hit the 6 h Actions limit. GLS strongly recommended | — |
+| Deliverables | Public repo: RTL, tests, passing GDS/precheck, architecture + instruction-set docs, assembler/toolchain + example programs, verification write-up. A video is optional | Repo can stay private until you submit |
+| Judging | No fixed weighting. **Flexibility first**, then protocols demonstrated, unique capabilities, design + verification. **Write-up weighed heavily** (readability, clarity on new techniques). Fewer protocols + strong architecture/verification can win | — |
+| Verification | They're interested in formal, constrained random, AI-assisted verification. Tests that run on open-source tools (cocotb) help them reproduce your results | — |
+| AI | Allowed. Describe how you used it in the write-up | — |
+| Teams | Students and professionals, any team size, one entry per team | — |
+| Outcome | Winners announced early Feb. ~4 designs taped out on the March 2027 shuttle. Winners get the chip on a demo board | — |
 
-- [ ] Deadline: 18 Jan 2027 (confirm the time zone and what has to be in by then: GDS, write-up, or both)
-- [ ] Shuttle and process: IHP 130 nm via Tiny Tapeout, `ttihp-verilog-template`
-- [ ] Allowed tile size (8x4?) and the exact `info.yaml` value
-- [ ] Cells per tile (~1K?) and total area
-- [ ] Pins: 8 in, 8 out, 8 bidir, plus clk and rst_n. Do any pins or a host interface come pre-assigned?
-- [ ] Clock: is "60 MHz is OK" a statement on the page or from a FAQ/Discord?
-- [ ] I/O round trip ~10 ns, max output ~66 MHz: whose estimate is this?
-- [ ] SRAM macros: allowed on this shuttle? What sizes, and how much area does one cost?
-- [ ] Judging criteria and weights, required deliverables, rules on AI use, team rules
+- [ ] Fill in the sign-up form (no confirmation email is sent)
+- [ ] Email to ask the deadline's time zone
+- [ ] Optional: join the Tiny Tapeout Discord competitions channel to find teammates
 
 ## 1. Learning path (each stage ends with a check)
 
@@ -60,6 +75,7 @@ I couldn't fetch the competition page from this environment, so every number bel
 
 ## 2. How an expert runs the project
 
+0. **Choose the paradigm deliberately.** The rules accept a CPU, multiple engines, an eFPGA or something else. Write a one-page comparison of at least three approaches against flexibility, area and verifiability before committing. (Everything below says "ISA". Read it as "programming model" if you don't go CPU-style.)
 1. **Requirements matrix**: protocols × primitives, including protocols you won't implement. Find the smallest set of independent primitives that covers it.
 2. **Budgets before design**:
    - Cycles per bit (or half-bit) at the chosen clock, for every row.
@@ -98,7 +114,10 @@ I couldn't fetch the competition page from this environment, so every number bel
 | Worst-case output jitter? | Gate-level measurement |
 | Can the host keep up at line rate? | Bandwidth calc + back-pressure test |
 | What happens on FIFO overflow or underflow? | Specified behaviour + test |
-| Several protocols at once? | Shown, or explicitly out of scope with a reason |
+| Several protocols at once? Controller and target roles? | Both are listed as pluses. Show them, or explain why they're out of scope |
+| For USB/Ethernet, how much runs on-chip (line coding, CRC, clock recovery)? | Breakdown of on-chip vs host work |
+| What external parts does it need? | Documented Pmod / pull-up / transceiver list |
+| Can we rerun your tests? | Open-source (cocotb) tests and a one-command run |
 | Area split, critical path, fmax? | Synthesis/STA reports, area time series |
 | How do you know RTL matches the spec? | Lockstep, formal, coverage |
 | What bug could your verification miss? | Honest list of what you didn't verify, and the residual risk |
